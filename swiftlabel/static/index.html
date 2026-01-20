@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SwiftLabel - Keyboard-first image classification tool">
+    <title>SwiftLabel</title>
+    <link rel="stylesheet" href="/style.css">
+    <!-- Preconnect to same origin for faster WebSocket -->
+    <link rel="preconnect" href="http://localhost:8765">
+</head>
+<body>
+    <!-- Main application container -->
+    <div id="app" class="app">
+
+        <!-- Subfolder navigation bar (v2) -->
+        <nav class="folder-nav" id="folder-nav" hidden>
+            <div class="folder-nav__breadcrumbs" id="breadcrumbs">
+                <span class="breadcrumb breadcrumb--current">
+                    <button class="breadcrumb__btn" data-path="">📁 root</button>
+                </span>
+            </div>
+            <div class="folder-nav__folders" id="folder-list">
+                <!-- Populated dynamically -->
+            </div>
+        </nav>
+
+        <!-- Header with progress -->
+        <header class="header">
+            <h1 class="header__title">SwiftLabel</h1>
+            <!-- Format indicator (v2) -->
+            <div class="header__format" id="format-indicator" hidden>
+                <span class="format-badge" id="format-badge">Unknown</span>
+            </div>
+            <div class="header__progress">
+                <span class="progress__counter" id="progress-counter">0/0</span>
+                <div class="progress__bar">
+                    <div class="progress__fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+                <span class="progress__percent" id="progress-percent">0%</span>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="main">
+            <!-- Image viewer -->
+            <div class="viewer">
+                <div class="viewer__container">
+                    <!-- Loading spinner (shown while image loads) -->
+                    <div class="viewer__loading" id="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
+
+                    <!-- Main image display -->
+                    <img
+                        id="current-image"
+                        class="viewer__image"
+                        alt="Current image for classification"
+                        draggable="false"
+                    >
+
+                    <!-- Deleted overlay -->
+                    <div class="viewer__deleted-overlay" id="deleted-overlay">
+                        <span class="deleted-overlay__icon">🗑️</span>
+                        <span class="deleted-overlay__text">Marked for deletion</span>
+                    </div>
+                </div>
+
+                <!-- Image info -->
+                <div class="viewer__info">
+                    <span class="info__filename" id="current-filename">—</span>
+                    <span class="info__label" id="current-label">Unlabeled</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Action bar with class buttons -->
+        <nav class="actions" id="action-bar">
+            <!-- Class buttons will be populated dynamically -->
+            <div class="actions__classes" id="class-buttons">
+                <!-- Generated: <button class="action-btn class-btn" data-class="0">[1] cat</button> -->
+            </div>
+
+            <div class="actions__controls">
+                <button class="action-btn delete-btn" id="btn-delete" title="Mark for deletion (D)">
+                    <kbd>D</kbd> Delete
+                </button>
+                <button class="action-btn undo-btn" id="btn-undo" title="Undo last action (U)">
+                    <kbd>U</kbd> Undo
+                </button>
+                <button class="action-btn commit-btn" id="btn-commit" title="Commit all changes (Enter)">
+                    <kbd>↵</kbd> Commit
+                    <span class="commit-btn__count" id="commit-count">0</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Keyboard hint bar -->
+        <footer class="hints">
+            <span class="hint"><kbd>←</kbd><kbd>H</kbd> Prev</span>
+            <span class="hint"><kbd>→</kbd><kbd>L</kbd> Next</span>
+            <span class="hint-divider">│</span>
+            <span class="hint" id="hint-folders" hidden><kbd>Tab</kbd> Folders</span>
+            <span class="hint-divider" id="hint-folders-divider" hidden>│</span>
+            <span class="hint"><kbd>N</kbd> Next unlabeled</span>
+            <span class="hint-divider">│</span>
+            <span class="hint"><kbd>?</kbd> Help</span>
+            <span class="hint"><kbd>S</kbd> Stats</span>
+        </footer>
+    </div>
+
+    <!-- Help overlay (hidden by default) -->
+    <div class="overlay overlay--help" id="help-overlay" hidden>
+        <div class="overlay__backdrop"></div>
+        <div class="overlay__content help-content">
+            <h2 class="help__title">Keyboard Shortcuts</h2>
+
+            <div class="help__columns">
+                <div class="help__column">
+                    <h3>Labeling</h3>
+                    <dl class="shortcut-list">
+                        <div class="shortcut">
+                            <dt><kbd>1</kbd>-<kbd>9</kbd></dt>
+                            <dd>Assign to class 1-9</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>0</kbd></dt>
+                            <dd>Assign to "other/unsorted"</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>D</kbd></dt>
+                            <dd>Mark for deletion</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>U</kbd></dt>
+                            <dd>Undo last action</dd>
+                        </div>
+                    </dl>
+
+                    <h3>Actions</h3>
+                    <dl class="shortcut-list">
+                        <div class="shortcut">
+                            <dt><kbd>Enter</kbd></dt>
+                            <dd>Commit all changes</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>Esc</kbd></dt>
+                            <dd>Cancel / Close overlay</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="help__column">
+                    <h3>Navigation</h3>
+                    <dl class="shortcut-list">
+                        <div class="shortcut">
+                            <dt><kbd>←</kbd> / <kbd>H</kbd></dt>
+                            <dd>Previous image</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>→</kbd> / <kbd>L</kbd></dt>
+                            <dd>Next image</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>J</kbd> / <kbd>K</kbd></dt>
+                            <dd>Next / Previous (vim)</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>g</kbd><kbd>g</kbd></dt>
+                            <dd>Jump to first image</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>G</kbd></dt>
+                            <dd>Jump to last image</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>N</kbd></dt>
+                            <dd>Next unlabeled image</dd>
+                        </div>
+                    </dl>
+
+                    <h3>Views</h3>
+                    <dl class="shortcut-list">
+                        <div class="shortcut">
+                            <dt><kbd>S</kbd></dt>
+                            <dd>Show statistics</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>?</kbd></dt>
+                            <dd>Toggle this help</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>F</kbd>+<kbd>1-9</kbd></dt>
+                            <dd>Filter by class</dd>
+                        </div>
+                        <div class="shortcut">
+                            <dt><kbd>F</kbd>+<kbd>0</kbd></dt>
+                            <dd>Clear filter</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <p class="help__footer">Press any key to close</p>
+        </div>
+    </div>
+
+    <!-- Stats overlay (hidden by default) -->
+    <div class="overlay overlay--stats" id="stats-overlay" hidden>
+        <div class="overlay__backdrop"></div>
+        <div class="overlay__content stats-content">
+            <h2 class="stats__title">Statistics</h2>
+
+            <div class="stats__progress">
+                <div class="stats__progress-header">
+                    <span>Progress</span>
+                    <span id="stats-progress-text">0/0 (0%)</span>
+                </div>
+                <div class="stats__progress-bar">
+                    <div class="stats__progress-fill" id="stats-progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="stats__distribution">
+                <h3>Distribution by Class</h3>
+                <div class="distribution-chart" id="distribution-chart">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <div class="stats__summary">
+                <div class="summary-item">
+                    <span class="summary-item__label">Unlabeled</span>
+                    <span class="summary-item__value" id="stats-unlabeled">0</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-item__label">Marked for deletion</span>
+                    <span class="summary-item__value" id="stats-deleted">0</span>
+                </div>
+            </div>
+
+            <p class="stats__footer">Press <kbd>S</kbd> or <kbd>Esc</kbd> to close</p>
+        </div>
+    </div>
+
+    <!-- Commit confirmation modal (hidden by default) -->
+    <div class="overlay overlay--commit" id="commit-overlay" hidden>
+        <div class="overlay__backdrop"></div>
+        <div class="overlay__content commit-content">
+            <h2 class="commit__title">Confirm Changes</h2>
+
+            <p class="commit__summary" id="commit-summary">
+                You are about to apply <strong id="commit-total">0</strong> changes:
+            </p>
+
+            <ul class="commit__details">
+                <li>
+                    <span class="commit__icon">📁</span>
+                    Move <strong id="commit-moves">0</strong> images to class folders
+                </li>
+                <li>
+                    <span class="commit__icon">🗑️</span>
+                    Delete <strong id="commit-deletes">0</strong> images permanently
+                </li>
+            </ul>
+
+            <p class="commit__warning">
+                ⚠️ This action cannot be undone!
+            </p>
+
+            <div class="commit__actions">
+                <button class="commit__btn commit__btn--confirm" id="btn-confirm-commit">
+                    <kbd>Enter</kbd> Confirm
+                </button>
+                <button class="commit__btn commit__btn--cancel" id="btn-cancel-commit">
+                    <kbd>Esc</kbd> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session resume modal (shown on startup if pending changes exist) -->
+    <div class="overlay overlay--session" id="session-overlay" hidden>
+        <div class="overlay__backdrop"></div>
+        <div class="overlay__content session-content">
+            <h2 class="session__title">📋 Resume Previous Session?</h2>
+
+            <p class="session__summary">
+                Found pending changes from a previous session:
+            </p>
+
+            <ul class="session__details">
+                <li>
+                    <span class="session__icon">🏷️</span>
+                    <strong id="session-labels">0</strong> labeled images
+                </li>
+                <li>
+                    <span class="session__icon">🗑️</span>
+                    <strong id="session-deletions">0</strong> images marked for deletion
+                </li>
+            </ul>
+
+            <p class="session__question">
+                Would you like to continue where you left off?
+            </p>
+
+            <div class="session__actions">
+                <button class="session__btn session__btn--resume" id="btn-resume-session">
+                    ✅ Resume Session
+                </button>
+                <button class="session__btn session__btn--fresh" id="btn-fresh-session">
+                    🔄 Start Fresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Connection status indicator -->
+    <div class="connection-status" id="connection-status" hidden>
+        <span class="connection-status__dot"></span>
+        <span class="connection-status__text">Reconnecting...</span>
+    </div>
+
+    <!-- Application script (loaded at end for faster initial render) -->
+    <script src="/app.js"></script>
+</body>
+</html>

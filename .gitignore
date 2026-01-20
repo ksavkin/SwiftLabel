@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.libs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# SwiftLabel Session
+.swiftlabel/
+history.jsonl
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Images (optional, but good to keep main clean)
+# Images (optional, but good to keep main clean)
+test_images/
+
+# Documentation (Local only)
+docs/
+docs2/
+.env*
+examples/
