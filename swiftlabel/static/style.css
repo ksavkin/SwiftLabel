@@ -247,8 +247,8 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: center;
-    max-width: 100%;
-    max-height: calc(100vh - 250px); /* Account for header, actions, hints */
+    width: 100%;
+    height: calc(100vh - 250px); /* Account for header, actions, hints */
     background-color: var(--color-bg-secondary);
     border-radius: var(--radius-lg);
     overflow: hidden;
