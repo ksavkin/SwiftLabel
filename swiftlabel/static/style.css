@@ -256,7 +256,7 @@ kbd {
 
 .viewer__image {
     max-width: 100%;
-    height: 100%;
+    max-height: 100%;
     object-fit: contain;
     user-select: none;
     transition: opacity var(--transition-fast);
