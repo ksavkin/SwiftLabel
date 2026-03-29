@@ -2,7 +2,7 @@
 
 **Keyboard - first image classification tool for ML practitioners who value speed and simplicity.**
 
-![SwiftLabel Demo](assets/demo_v2.gif)
+![SwiftLabel Demo](https://raw.githubusercontent.com/ksavkin/SwiftLabel/main/assets/demo_v2.gif)
 
 SwiftLabel is a local-only, zero-config tool that lets you classify images using keyboard shortcuts. All changes are staged until you commit them, ensuring a non-destructive workflow.
 
@@ -18,15 +18,7 @@ SwiftLabel is a local-only, zero-config tool that lets you classify images using
 ## Installation
 
 ```bash
-pip install git+https://github.com/ksavkin/SwiftLabel.git
-```
-
-Or install from source:
-
-```bash
-git clone https://github.com/ksavkin/SwiftLabel.git
-cd swiftlabel
-pip install -e ".[dev]"
+pip install swiftlabel
 ```
 
 ## Quick Start
