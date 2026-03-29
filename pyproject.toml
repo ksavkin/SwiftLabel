@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "swiftlabel"
-version = "1.0.0"
+version = "0.1.0"
 description = "Keyboard-first image classification tool for ML practitioners"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "SwiftLabel Team" }
+    { name = "Konstantin Savkin", email = "k.e.savkin@gmail.com" }
 ]
 keywords = [
     "image-classification",
