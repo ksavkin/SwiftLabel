@@ -1,6 +1,12 @@
 # SwiftLabel
 
-**Keyboard - first image classification tool for ML practitioners who value speed and simplicity.**
+[![PyPI](https://img.shields.io/pypi/v/swiftlabel)](https://pypi.org/project/swiftlabel/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Website](https://img.shields.io/badge/Website-swiftlabel.dev-green)](https://swiftlabel.dev)
+
+**Keyboard-first image classification tool for ML practitioners who value speed and simplicity.**
+
+**Website:** [swiftlabel.dev](https://swiftlabel.dev)
 
 ![SwiftLabel Demo](https://raw.githubusercontent.com/ksavkin/SwiftLabel/main/assets/demo_v2.gif)
 
